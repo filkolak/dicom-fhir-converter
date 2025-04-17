@@ -1,5 +1,7 @@
+import datetime
 import uuid
 import os
+import traceback
 from fhir import resources as fr
 from pydicom import dcmread
 from pydicom import dataset
@@ -21,7 +23,7 @@ def _add_imaging_study_instance(study: fr.imagingstudy.ImagingStudy, series: fr.
         print(selectedInstance.as_json())
         return
 
-    selectedInstance = fr.imagingstudy.ImagingStudySeriesInstance()
+    selectedInstance = fr.imagingstudy.ImagingStudySeriesInstance.model_construct()
     selectedInstance.uid = instanceUID
     selectedInstance.sopClass = dicom2fhirutils.gen_instance_sopclass(ds.SOPClassUID)
     selectedInstance.number = ds.InstanceNumber
@@ -54,7 +56,7 @@ def _add_imaging_study_series(study: fr.imagingstudy.ImagingStudy, ds: dataset.F
         _add_imaging_study_instance(study, selectedSeries, ds, fp)
         return
     # Creating New Series
-    series = fr.imagingstudy.ImagingStudySeries()
+    series = fr.imagingstudy.ImagingStudySeries.model_construct()
     series.uid = seriesInstanceUID
     try:
         series.description = ds.SeriesDescription
@@ -75,7 +77,9 @@ def _add_imaging_study_series(study: fr.imagingstudy.ImagingStudy, ds: dataset.F
 
     try:
         sdate = ds.SeriesDate
-        series.started = dicom2fhirutils.gen_started_datetime(sdate, stime)
+        # TODO: fix date format
+        # series.started = dicom2fhirutils.gen_started_datetime(sdate, stime)
+        series.started = datetime.datetime.now()
     except Exception:
         pass  # print("Series Date is missing")
 
@@ -100,9 +104,9 @@ def _add_imaging_study_series(study: fr.imagingstudy.ImagingStudy, ds: dataset.F
 
 
 def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
-    study = fr.imagingstudy.ImagingStudy()
-    study.id = str(uuid.uuid4())
+    study = fr.imagingstudy.ImagingStudy.model_construct()
     study.status = "available"
+    study.id = str(uuid.uuid4())
     try:
         study.description = ds.StudyDescription
     except Exception:
@@ -119,14 +123,14 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
         pass  # print("Issuer of Patient ID is missing")
 
     study.contained = []
-    patientReference = fr.fhirreference.FHIRReference()
+    patientReference = fr.reference.Reference.model_construct()
     patientref = "patient.contained.inline"
     patientReference.reference = "#" + patientref
     study.contained.append(dicom2fhirutils.inline_patient_resource(patientref, ds.PatientID, ipid, ds.PatientName,
                                                                    ds.PatientSex, ds.PatientBirthDate))
     study.subject = patientReference
     study.endpoint = []
-    endpoint = fr.fhirreference.FHIRReference()
+    endpoint = fr.reference.Reference.model_construct()
     endpoint.reference = "file://" + dcmDir
 
     study.endpoint.append(endpoint)
@@ -137,7 +141,8 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
     except Exception:
         pass  # procedure code sequence not found
 
-    study.procedureCode = dicom2fhirutils.gen_procedurecode_array(procedures)
+    # TODO: replace with procedure: typing.List[fhirtypes.CodeableReferenceType] | None
+    # study.procedureCode = dicom2fhirutils.gen_procedurecode_array(procedures)
 
     studyTime = None
     try:
@@ -147,7 +152,9 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
 
     try:
         studyDate = ds.StudyDate
-        study.started = dicom2fhirutils.gen_started_datetime(studyDate, studyTime)
+        # TODO: fix date format
+        # study.started = dicom2fhirutils.gen_started_datetime(studyDate, studyTime)
+        study.started = datetime.datetime.now()
     except Exception:
         pass  # print("Study Date is missing")
 
@@ -166,7 +173,8 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
     except Exception:
         pass  # print ("Reason for Requested procedures not found")
 
-    study.reasonCode = dicom2fhirutils.gen_reason(reason, reasonStr)
+    # TODO: replace with reason: typing.List[fhirtypes.CodeableReferenceType] | None
+    # study.reasonCode = dicom2fhirutils.gen_reason(reason, reasonStr)
 
     study.numberOfSeries = 0
     study.numberOfInstances = 0
@@ -190,11 +198,11 @@ def process_dicom_2_fhir(dcmDir: str) -> fr.imagingstudy.ImagingStudy:
                     studyInstanceUID = ds.StudyInstanceUID
                 if studyInstanceUID != ds.StudyInstanceUID:
                     raise Exception("Incorrect DCM path, more than one study detected")
-                    return None
                 if imagingStudy is None:
                     imagingStudy = _create_imaging_study(ds, fp, dcmDir)
                 else:
                     _add_imaging_study_series(imagingStudy, ds, fp)
-        except Exception:
-            pass  # file is not a dicom file
+        except Exception as e:
+            # pass  # file is not a dicom file
+            print(traceback.format_exc())
     return imagingStudy

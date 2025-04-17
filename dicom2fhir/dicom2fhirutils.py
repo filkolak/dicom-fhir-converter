@@ -6,7 +6,7 @@ from fhir.resources import codeableconcept
 from fhir.resources import coding
 from fhir.resources import patient
 from fhir.resources import humanname
-from fhir.resources import fhirdate
+# from fhir.resources import fhirdate
 from fhir.resources import reference
 
 TERMINOLOGY_CODING_SYS = "http://terminology.hl7.org/CodeSystem/v2-0203"
@@ -73,31 +73,30 @@ def calc_gender(gender):
     return "unknown"
 
 
-def calc_dob(dicom_dob):
-    if dicom_dob == '':
-        return None
+# def calc_dob(dicom_dob):
+#     if dicom_dob == '':
+#         return None
 
-    fhir_dob = fhirdate.FHIRDate()
-    try:
-        dob = datetime.strptime(dicom_dob, '%Y%m%d')
-        fhir_dob.date = dob
-    except Exception:
-        return None
-    return fhir_dob
+#     fhir_dob = fhirdate.FHIRDate()
+#     try:
+#         dob = datetime.strptime(dicom_dob, '%Y%m%d')
+#         fhir_dob.date = dob
+#     except Exception:
+#         return None
+#     return fhir_dob
 
 
 def inline_patient_resource(referenceId, PatientID, IssuerOfPatientID, patientName, gender, dob):
-    p = patient.Patient()
+    p = patient.Patient.model_construct()
     p.id = referenceId
     p.name = []
-    p.use = "official"
     p.identifier = [get_patient_resource_ids(PatientID, IssuerOfPatientID)]
-    hn = humanname.HumanName()
+    hn = humanname.HumanName.model_construct()
     hn.family = patientName.family_name
     hn.given = [patientName.given_name]
     p.name.append(hn)
     p.gender = calc_gender(gender)
-    p.birthDate = calc_dob(dob)
+    p.birthDate = datetime.strptime(dob, '%Y%m%d').date()
     p.active = True
     return p
 
@@ -121,19 +120,19 @@ def gen_procedurecode_array(procedures):
     return None
 
 
-def gen_started_datetime(dt, tm):
-    if dt is None:
-        return None
+# def gen_started_datetime(dt, tm):
+#     if dt is None:
+#         return None
 
-    fhirDtm = fhirdate.FHIRDate()
-    fhirDtm.date = datetime.strptime(dt, '%Y%m%d')
-    if tm is None or len(tm) < 6:
-        return fhirDtm
-    studytm = datetime.strptime(tm[0:6], '%H%M%S')
+#     fhirDtm = fhirdate.FHIRDate()
+#     fhirDtm.date = datetime.strptime(dt, '%Y%m%d')
+#     if tm is None or len(tm) < 6:
+#         return fhirDtm
+#     studytm = datetime.strptime(tm[0:6], '%H%M%S')
 
-    fhirDtm.date = fhirDtm.date.replace(hour=studytm.hour, minute=studytm.minute, second=studytm.second)
+#     fhirDtm.date = fhirDtm.date.replace(hour=studytm.hour, minute=studytm.minute, second=studytm.second)
 
-    return fhirDtm
+#     return fhirDtm
 
 
 def gen_reason(reason, reasonStr):
@@ -158,22 +157,33 @@ def gen_reason(reason, reasonStr):
     return reasonList
 
 
+# def gen_modality_coding(mod):
+#     c = coding.Coding()
+#     c.system = ACQUISITION_MODALITY_SYS
+#     c.code = mod
+#     return c
+
+
 def gen_modality_coding(mod):
+    rc = codeableconcept.CodeableConcept.model_construct()
+    rc.coding = []
     c = coding.Coding()
     c.system = ACQUISITION_MODALITY_SYS
     c.code = mod
-    return c
+    rc.coding.append(c)
+    return rc
 
 
-def update_study_modality_list(study: imagingstudy.ImagingStudy, modality: coding.Coding):
+def update_study_modality_list(study: imagingstudy.ImagingStudy, modality: codeableconcept.CodeableConcept):
     if study.modality is None or len(study.modality) <= 0:
         study.modality = []
         study.modality.append(modality)
         return
 
-    c = next((mc for mc in study.modality if mc.system == modality.system and mc.code == modality.code), None)
-    if c is not None:
-        return
+    # TODO: fix this. modality list should have unique elements
+    # c = next((mc for mc in study.modality if mc.system == modality.system and mc.code == modality.code), None)
+    # if c is not None:
+    #     return
 
     study.modality.append(modality)
     return
