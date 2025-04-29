@@ -1,6 +1,5 @@
 import uuid
 import os
-import traceback
 from fhir import resources as fr
 from pydicom import dcmread
 from pydicom import dataset
@@ -195,7 +194,6 @@ def process_dicom_2_fhir(dcmDir: str) -> fr.imagingstudy.ImagingStudy:
                     imagingStudy = _create_imaging_study(ds, fp, dcmDir)
                 else:
                     _add_imaging_study_series(imagingStudy, ds, fp)
-        except Exception as e:
-            # pass  # file is not a dicom file
-            print(traceback.format_exc())
+        except Exception:
+            pass  # file is not a dicom file
     return imagingStudy

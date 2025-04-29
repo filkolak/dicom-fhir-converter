@@ -90,10 +90,13 @@ def inline_patient_resource(referenceId, PatientID, IssuerOfPatientID, patientNa
     p.id = referenceId
     p.name = []
     p.identifier = [get_patient_resource_ids(PatientID, IssuerOfPatientID)]
-    hn = humanname.HumanName.model_construct()
-    hn.family = patientName.family_name
-    hn.given = [patientName.given_name]
-    p.name.append(hn)
+    try:
+        hn = humanname.HumanName.model_construct()
+        hn.family = patientName.family_name
+        hn.given = [patientName.given_name]
+        p.name.append(hn)
+    except Exception:
+        pass
     p.gender = calc_gender(gender)
     p.birthDate = calc_dob(dob)
     p.active = True
