@@ -138,7 +138,7 @@ def gen_started_datetime(dt, tm) -> datetime | date | None:
     return fhirDtm
 
 
-def gen_reason(reason, reasonStr):
+def gen_reason(reason, reasonStr) -> typing.List[codeablereference.CodeableReference] | None:
     if reason is None and reasonStr is None:
         return None
     reasonList = []
@@ -156,7 +156,7 @@ def gen_reason(reason, reasonStr):
         c.code = r["code"]
         c.display = r["display"]
         rc.coding.append(c)
-        reasonList.append(rc)
+        reasonList.append(codeablereference.CodeableReference(concept=rc))
     return reasonList
 
 

@@ -167,8 +167,7 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
     except Exception:
         pass  # print ("Reason for Requested procedures not found")
 
-    # TODO: replace with reason: typing.List[fhirtypes.CodeableReferenceType] | None
-    # study.reasonCode = dicom2fhirutils.gen_reason(reason, reasonStr)
+    study.reason = dicom2fhirutils.gen_reason(reason, reasonStr)
 
     study.numberOfSeries = 0
     study.numberOfInstances = 0
