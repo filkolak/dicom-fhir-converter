@@ -74,19 +74,6 @@ def calc_gender(gender):
     return "unknown"
 
 
-# def calc_dob(dicom_dob):
-#     if dicom_dob == '':
-#         return None
-
-#     fhir_dob = fhirdate.FHIRDate()
-#     try:
-#         dob = datetime.strptime(dicom_dob, '%Y%m%d')
-#         fhir_dob.date = dob
-#     except Exception:
-#         return None
-#     return fhir_dob
-
-
 def inline_patient_resource(referenceId, PatientID, IssuerOfPatientID, patientName, gender, dob):
     p = patient.Patient.model_construct()
     p.id = referenceId
@@ -158,13 +145,6 @@ def gen_reason(reason, reasonStr) -> typing.List[codeablereference.CodeableRefer
         rc.coding.append(c)
         reasonList.append(codeablereference.CodeableReference(concept=rc))
     return reasonList
-
-
-# def gen_modality_coding(mod):
-#     c = coding.Coding()
-#     c.system = ACQUISITION_MODALITY_SYS
-#     c.code = mod
-#     return c
 
 
 def gen_modality_coding(mod):
