@@ -180,10 +180,9 @@ def update_study_modality_list(study: imagingstudy.ImagingStudy, modality: codea
         study.modality.append(modality)
         return
 
-    # TODO: fix this. modality list should have unique elements
-    # c = next((mc for mc in study.modality if mc.system == modality.system and mc.code == modality.code), None)
-    # if c is not None:
-    #     return
+    c = next((mc for mc in study.modality if mc.coding == modality.coding), None)
+    if c is not None:
+        return
 
     study.modality.append(modality)
     return
