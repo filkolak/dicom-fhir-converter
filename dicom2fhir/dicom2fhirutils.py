@@ -1,12 +1,13 @@
 from datetime import datetime, date
+import typing
 
 from fhir.resources import imagingstudy
 from fhir.resources import identifier
 from fhir.resources import codeableconcept
+from fhir.resources import codeablereference
 from fhir.resources import coding
 from fhir.resources import patient
 from fhir.resources import humanname
-# from fhir.resources import fhirdate
 from fhir.resources import reference
 
 TERMINOLOGY_CODING_SYS = "http://terminology.hl7.org/CodeSystem/v2-0203"
@@ -101,12 +102,12 @@ def inline_patient_resource(referenceId, PatientID, IssuerOfPatientID, patientNa
     return p
 
 
-def gen_procedurecode_array(procedures):
+def gen_procedurecode_array(procedures) -> typing.List[codeablereference.CodeableReference] | None:
     if procedures is None:
         return None
     fhir_proc = []
     for p in procedures:
-        concept = codeableconcept.CodeableConcept()
+        concept = codeableconcept.CodeableConcept.model_construct()
         c = coding.Coding()
         c.system = p["system"]
         c.code = p["code"]
@@ -114,7 +115,7 @@ def gen_procedurecode_array(procedures):
         concept.coding = []
         concept.coding.append(c)
         concept.text = p["display"]
-        fhir_proc.append(concept)
+        fhir_proc.append(codeablereference.CodeableReference(concept=concept))
     if len(fhir_proc) > 0:
         return fhir_proc
     return None

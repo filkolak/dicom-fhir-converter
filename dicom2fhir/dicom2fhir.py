@@ -1,4 +1,3 @@
-import datetime
 import uuid
 import os
 import traceback
@@ -139,8 +138,7 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
     except Exception:
         pass  # procedure code sequence not found
 
-    # TODO: replace with procedure: typing.List[fhirtypes.CodeableReferenceType] | None
-    # study.procedureCode = dicom2fhirutils.gen_procedurecode_array(procedures)
+    study.procedure = dicom2fhirutils.gen_procedurecode_array(procedures)
 
     studyTime = None
     try:
