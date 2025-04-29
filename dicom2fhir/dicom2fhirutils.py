@@ -1,14 +1,16 @@
-from datetime import datetime, date
 import typing
+from datetime import date, datetime
 
-from fhir.resources import imagingstudy
-from fhir.resources import identifier
-from fhir.resources import codeableconcept
-from fhir.resources import codeablereference
-from fhir.resources import coding
-from fhir.resources import patient
-from fhir.resources import humanname
-from fhir.resources import reference
+from fhir.resources import (
+    codeableconcept,
+    codeablereference,
+    coding,
+    humanname,
+    identifier,
+    imagingstudy,
+    patient,
+    reference,
+)
 
 TERMINOLOGY_CODING_SYS = "http://terminology.hl7.org/CodeSystem/v2-0203"
 TERMINOLOGY_CODING_SYS_CODE_ACCESSION = "ACSN"
@@ -75,11 +77,11 @@ def calc_gender(gender):
 
 
 def calc_dob(dicom_dob):
-    if dicom_dob == '':
+    if dicom_dob == "":
         return None
 
     try:
-        dob = datetime.strptime(dicom_dob, '%Y%m%d')
+        dob = datetime.strptime(dicom_dob, "%Y%m%d")
         return dob.date()
     except Exception:
         return None
@@ -126,11 +128,11 @@ def gen_started_datetime(dt, tm) -> datetime | date | None:
     if dt is None:
         return None
 
-    fhirDtm = datetime.strptime(dt, '%Y%m%d').date()
+    fhirDtm = datetime.strptime(dt, "%Y%m%d").date()
     if tm is None or len(tm) < 6:
         return fhirDtm
-    
-    studytm = datetime.strptime(tm[0:6], '%H%M%S')
+
+    studytm = datetime.strptime(tm[0:6], "%H%M%S")
     # SEE: https://build.fhir.org/datatypes.html#dateTime
     # In FHIR dateTime type documentation it says that:
     # 'if hours and minutes are specified, a timezone offset SHALL be populated'
@@ -171,7 +173,9 @@ def gen_modality_coding(mod):
     return rc
 
 
-def update_study_modality_list(study: imagingstudy.ImagingStudy, modality: codeableconcept.CodeableConcept):
+def update_study_modality_list(
+    study: imagingstudy.ImagingStudy, modality: codeableconcept.CodeableConcept
+):
     if study.modality is None or len(study.modality) <= 0:
         study.modality = []
         study.modality.append(modality)
@@ -213,11 +217,11 @@ def dcm_coded_concept(CodeSequence):
 def gen_bodysite_coding(text) -> codeablereference.CodeableReference | None:
     if text is None:
         return None
-    
+
     concept = codeableconcept.CodeableConcept.model_construct()
     c = coding.Coding()
     c.code = text
     c.userSelected = True
     concept.coding = [c]
-    
+
     return codeablereference.CodeableReference(concept=concept)

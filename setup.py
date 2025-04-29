@@ -1,7 +1,6 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
-
-REQUIREMENTS = 'requirements.txt'
+REQUIREMENTS = "requirements.txt"
 
 
 def load_requirements():
@@ -13,10 +12,7 @@ def load_requirements():
         raise StopIteration
 
 
-test_requirements = [
-    "pytest==4.6.3",
-    "pytest-cov==2.7.1"
-]
+test_requirements = ["pytest==4.6.3", "pytest-cov==2.7.1"]
 
 requirements = load_requirements()
 
@@ -28,12 +24,12 @@ setup(
     include_package_data=True,
     keywords="fhir, resources, python, hl7, health IT, healthcare",
     name="dicom2fhir",
-    #namespace_packages=["dicom2fhir"],
-    #package_dir={"": ""},
-    packages=find_packages('.', exclude=["*tests*"]),
-    #test_suite="tests",
+    # namespace_packages=["dicom2fhir"],
+    # package_dir={"": ""},
+    packages=find_packages(".", exclude=["*tests*"]),
+    # test_suite="tests",
     tests_require=test_requirements + requirements,
     url="https://github.ibm.com/ebaron/dicom-fhir-converter",
     version="0.0.1",
-    python_requires=">=3.6"
+    python_requires=">=3.6",
 )

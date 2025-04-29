@@ -1,14 +1,18 @@
-import uuid
 import os
+import uuid
+
 from fhir import resources as fr
-from pydicom import dcmread
-from pydicom import dataset
+from pydicom import dataset, dcmread
 
 from . import dicom2fhirutils
 
 
-def _add_imaging_study_instance(study: fr.imagingstudy.ImagingStudy, series: fr.imagingstudy.ImagingStudySeries,
-                                ds: dataset.FileDataset, fp):
+def _add_imaging_study_instance(
+    study: fr.imagingstudy.ImagingStudy,
+    series: fr.imagingstudy.ImagingStudySeries,
+    ds: dataset.FileDataset,
+    fp,
+):
     selectedInstance = None
     instanceUID = ds.SOPInstanceUID
     if series.instance is not None:
@@ -31,7 +35,7 @@ def _add_imaging_study_instance(study: fr.imagingstudy.ImagingStudy, series: fr.
             seq = ds.ConceptNameCodeSequence
             selectedInstance.title = seq[0x0008, 0x0104]
         else:
-            selectedInstance.title = '\\'.join(ds.ImageType)
+            selectedInstance.title = "\\".join(ds.ImageType)
     except Exception:
         pass  # print("Unable to set instance title")
 
@@ -122,8 +126,11 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
     patientReference = fr.reference.Reference.model_construct()
     patientref = "patient.contained.inline"
     patientReference.reference = "#" + patientref
-    study.contained.append(dicom2fhirutils.inline_patient_resource(patientref, ds.PatientID, ipid, ds.PatientName,
-                                                                   ds.PatientSex, ds.PatientBirthDate))
+    study.contained.append(
+        dicom2fhirutils.inline_patient_resource(
+            patientref, ds.PatientID, ipid, ds.PatientName, ds.PatientSex, ds.PatientBirthDate
+        )
+    )
     study.subject = patientReference
     study.endpoint = []
     endpoint = fr.reference.Reference.model_construct()
@@ -177,7 +184,7 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
 def process_dicom_2_fhir(dcmDir: str) -> fr.imagingstudy.ImagingStudy:
     files = []
     # TODO: subdirectory must be traversed
-    for r, d, f in os.walk(dcmDir):
+    for r, _d, f in os.walk(dcmDir):
         for file in f:
             files.append(os.path.join(r, file))
 

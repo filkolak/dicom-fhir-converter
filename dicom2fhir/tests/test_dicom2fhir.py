@@ -1,7 +1,9 @@
 import os
 import unittest
-from .. import dicom2fhir
+
 from fhir import resources as fr
+
+from .. import dicom2fhir
 
 
 class testDicom2FHIR(unittest.TestCase):
@@ -17,14 +19,21 @@ class testDicom2FHIR(unittest.TestCase):
         self.assertEqual(len(study.modality), 1, "Series must list only one modality")
         self.assertEqual(study.modality[0].coding[0].code, "CR", "Incorrect modality detected")
         self.assertEqual(len(study.series), 1, "Number objects in Series Array: mismatch")
-        self.assertEqual(len(study.series[0].instance), 1, "Number objects in Instance Array: mismatch")
+        self.assertEqual(
+            len(study.series[0].instance), 1, "Number objects in Instance Array: mismatch"
+        )
 
         series: fr.ImagingSeries
         series = study.series[0]
         self.assertIsNotNone(series, "Missing Series")
-        self.assertEqual(series.bodySite.concept.coding[0].code, 'CHEST', "CHEST is expected bodys site")
-        self.assertTrue(series.bodySite.concept.coding[0].userSelected,
-                        "Body Site is currently not a coded concept. Text is used so userSelected value must be set to true")
+        self.assertEqual(
+            series.bodySite.concept.coding[0].code, "CHEST", "CHEST is expected bodys site"
+        )
+        self.assertTrue(
+            series.bodySite.concept.coding[0].userSelected,
+            "Body Site is currently not a coded concept. "
+            "Text is used so userSelected value must be set to true",
+        )
         instance: fr.ImagingInstance
         instance = series.instance[0]
         self.assertIsNotNone(instance, "Missing Instance")
