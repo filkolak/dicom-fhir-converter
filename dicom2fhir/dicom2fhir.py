@@ -81,7 +81,7 @@ def _add_imaging_study_series(study: fr.imagingstudy.ImagingStudy, ds: dataset.F
         pass  # print("Series Date is missing")
 
     try:
-        series.bodySite = dicom2fhirutils.gen_coding_text_only(ds.BodyPartExamined)
+        series.bodySite = dicom2fhirutils.gen_bodysite_coding(ds.BodyPartExamined)
     except Exception:
         pass  # print ("Body Part Examined missing")
 

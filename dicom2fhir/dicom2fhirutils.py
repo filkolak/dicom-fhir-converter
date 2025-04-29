@@ -205,3 +205,16 @@ def dcm_coded_concept(CodeSequence):
         concept["display"] = seq[0x0008, 0x0104].value
         concepts.append(concept)
     return concepts
+
+
+def gen_bodysite_coding(text) -> codeablereference.CodeableReference | None:
+    if text is None:
+        return None
+    
+    concept = codeableconcept.CodeableConcept.model_construct()
+    c = coding.Coding()
+    c.code = text
+    c.userSelected = True
+    concept.coding = [c]
+    
+    return codeablereference.CodeableReference(concept=concept)

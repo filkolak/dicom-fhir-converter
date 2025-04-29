@@ -15,15 +15,15 @@ class testDicom2FHIR(unittest.TestCase):
         self.assertEqual(study.numberOfInstances, 1, "Number of Instances in the study mismatch")
         self.assertIsNotNone(study.series, "Series was not built for the study")
         self.assertEqual(len(study.modality), 1, "Series must list only one modality")
-        self.assertEqual(study.modality[0].code, "CR", "Incorrect modality detected")
+        self.assertEqual(study.modality[0].coding[0].code, "CR", "Incorrect modality detected")
         self.assertEqual(len(study.series), 1, "Number objects in Series Array: mismatch")
         self.assertEqual(len(study.series[0].instance), 1, "Number objects in Instance Array: mismatch")
 
         series: fr.ImagingSeries
         series = study.series[0]
         self.assertIsNotNone(series, "Missing Series")
-        self.assertEqual(series.bodySite.code, 'CHEST', "CHEST is expected bodys site")
-        self.assertTrue(series.bodySite.userSelected,
+        self.assertEqual(series.bodySite.concept.coding[0].code, 'CHEST', "CHEST is expected bodys site")
+        self.assertTrue(series.bodySite.concept.coding[0].userSelected,
                         "Body Site is currently not a coded concept. Text is used so userSelected value must be set to true")
         instance: fr.ImagingInstance
         instance = series.instance[0]
@@ -38,7 +38,7 @@ class testDicom2FHIR(unittest.TestCase):
         self.assertEqual(study.numberOfInstances, 5)
         self.assertIsNotNone(study.series, "Series was not built for the study")
         self.assertEqual(len(study.modality), 1, "Only single modality expected for this study")
-        self.assertEqual(study.modality[0].code, "CR")
+        self.assertEqual(study.modality[0].coding[0].code, "CR")
         self.assertEqual(len(study.series), 1, "Incorrect number of series detected")
         self.assertEqual(len(study.series[0].instance), 5, "Incorrect number of instances detected")
 
@@ -51,5 +51,5 @@ class testDicom2FHIR(unittest.TestCase):
         self.assertEqual(study.numberOfInstances, 4, "Number of Instances in the study mismatch")
         self.assertIsNotNone(study.series, "Series was not built for the study")
         self.assertEqual(len(study.modality), 1, "Only single modality expected for this study")
-        self.assertEqual(study.modality[0].code, "CR", "Incorrect Modality detected")
+        self.assertEqual(study.modality[0].coding[0].code, "CR", "Incorrect Modality detected")
         self.assertEqual(len(study.series), 4, "Number of series in the study: mismatch")
