@@ -74,6 +74,17 @@ def calc_gender(gender):
     return "unknown"
 
 
+def calc_dob(dicom_dob):
+    if dicom_dob == '':
+        return None
+
+    try:
+        dob = datetime.strptime(dicom_dob, '%Y%m%d')
+        return dob.date()
+    except Exception:
+        return None
+
+
 def inline_patient_resource(referenceId, PatientID, IssuerOfPatientID, patientName, gender, dob):
     p = patient.Patient.model_construct()
     p.id = referenceId
@@ -84,7 +95,7 @@ def inline_patient_resource(referenceId, PatientID, IssuerOfPatientID, patientNa
     hn.given = [patientName.given_name]
     p.name.append(hn)
     p.gender = calc_gender(gender)
-    p.birthDate = datetime.strptime(dob, '%Y%m%d').date()
+    p.birthDate = calc_dob(dob)
     p.active = True
     return p
 
