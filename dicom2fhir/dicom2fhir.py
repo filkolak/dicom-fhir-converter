@@ -77,9 +77,7 @@ def _add_imaging_study_series(study: fr.imagingstudy.ImagingStudy, ds: dataset.F
 
     try:
         sdate = ds.SeriesDate
-        # TODO: fix date format
-        # series.started = dicom2fhirutils.gen_started_datetime(sdate, stime)
-        series.started = datetime.datetime.now()
+        series.started = dicom2fhirutils.gen_started_datetime(sdate, stime)
     except Exception:
         pass  # print("Series Date is missing")
 
@@ -152,9 +150,7 @@ def _create_imaging_study(ds, fp, dcmDir) -> fr.imagingstudy.ImagingStudy:
 
     try:
         studyDate = ds.StudyDate
-        # TODO: fix date format
-        # study.started = dicom2fhirutils.gen_started_datetime(studyDate, studyTime)
-        study.started = datetime.datetime.now()
+        study.started = dicom2fhirutils.gen_started_datetime(studyDate, studyTime)
     except Exception:
         pass  # print("Study Date is missing")
 

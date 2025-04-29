@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from fhir.resources import imagingstudy
 from fhir.resources import identifier
@@ -120,19 +120,21 @@ def gen_procedurecode_array(procedures):
     return None
 
 
-# def gen_started_datetime(dt, tm):
-#     if dt is None:
-#         return None
+def gen_started_datetime(dt, tm) -> datetime | date | None:
+    if dt is None:
+        return None
 
-#     fhirDtm = fhirdate.FHIRDate()
-#     fhirDtm.date = datetime.strptime(dt, '%Y%m%d')
-#     if tm is None or len(tm) < 6:
-#         return fhirDtm
-#     studytm = datetime.strptime(tm[0:6], '%H%M%S')
-
-#     fhirDtm.date = fhirDtm.date.replace(hour=studytm.hour, minute=studytm.minute, second=studytm.second)
-
-#     return fhirDtm
+    fhirDtm = datetime.strptime(dt, '%Y%m%d').date()
+    if tm is None or len(tm) < 6:
+        return fhirDtm
+    
+    studytm = datetime.strptime(tm[0:6], '%H%M%S')
+    # SEE: https://build.fhir.org/datatypes.html#dateTime
+    # In FHIR dateTime type documentation it says that:
+    # 'if hours and minutes are specified, a timezone offset SHALL be populated'
+    # So we need to set the timezone offset in the future to be compatible with FHIR
+    fhirDtm = datetime.combine(fhirDtm, studytm.time())
+    return fhirDtm
 
 
 def gen_reason(reason, reasonStr):
